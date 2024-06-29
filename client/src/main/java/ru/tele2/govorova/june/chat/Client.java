@@ -22,6 +22,14 @@ public class Client {
                     String message = in.readUTF();
                     if (message.equals("/exitok")) {
                         break;
+
+                    } if (message.startsWith("/authok ")) {
+                        System.out.println("Удалось успешно войти в чат под именем пользователя: " + message.split(" ")[1]);
+                        continue;
+                    }
+                    if (message.startsWith("/regok ")) {
+                        System.out.println("Удалось успешно пройти регистрацию и войти в чат под именем пользователя: " + message.split(" ")[1]);
+                        continue;
                     }
                     System.out.println(message);
                 }
