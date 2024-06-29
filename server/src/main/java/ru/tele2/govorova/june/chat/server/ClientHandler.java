@@ -35,8 +35,17 @@ public class ClientHandler {
                         if (message.equals("/exit")) {
                             sendMessage("/exitok");
                             break;
+                        } else if (message.startsWith("/w")) {
+
+                            String[] words = message.split(" ");
+                            String userToSend = words[1];
+                            String messageToSend = "";
+                            for (int i = 2; i < words.length; i++) {
+                                messageToSend = messageToSend.concat(words[i] + " ");
+                            }
+                            server.whisperMessage(username + ": " + messageToSend, userToSend);
+                            continue;
                         }
-                        continue;
                     }
                     server.broadcastMessage(username + ": " + message);
                 }
@@ -81,3 +90,4 @@ public class ClientHandler {
         }
     }
 }
+

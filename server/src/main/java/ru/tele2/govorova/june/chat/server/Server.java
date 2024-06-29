@@ -41,4 +41,13 @@ public class Server {
             c.sendMessage(message);
         }
     }
+
+    public synchronized void whisperMessage(String message, String username) {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(username)) {
+                c.sendMessage(message);
+            }
+        }
+    }
 }
+
