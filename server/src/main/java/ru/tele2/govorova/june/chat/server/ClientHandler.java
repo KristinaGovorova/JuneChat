@@ -44,8 +44,9 @@ public class ClientHandler {
                                 messageToSend = messageToSend.concat(words[i] + " ");
                             }
                             server.whisperMessage(username + ": " + messageToSend, userToSend);
-                            continue;
+
                         }
+                        continue;
                     }
                     server.broadcastMessage(username + ": " + message);
                 }
