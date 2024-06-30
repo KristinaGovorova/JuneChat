@@ -35,16 +35,20 @@ public class ClientHandler {
                         if (message.equals("/exit")) {
                             sendMessage("/exitok");
                             break;
-                        } else if (message.startsWith("/w")) {
-
+                        }
+                        if (message.startsWith("/w")) {
                             String[] words = message.split(" ");
+                            if (words.length < 3) {
+                                sendMessage("Неверный формат команды /w");
+                                continue;
+                            }
                             String userToSend = words[1];
                             String messageToSend = "";
                             for (int i = 2; i < words.length; i++) {
                                 messageToSend = messageToSend.concat(words[i] + " ");
                             }
                             server.whisperMessage(username + ": " + messageToSend, userToSend);
-
+                            continue;
                         }
                         continue;
                     }
