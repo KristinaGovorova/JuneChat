@@ -14,13 +14,14 @@ public class ClientHandler {
     private String username;
 
 
-
     public String getUsername() {
         return username;
     }
+
     public void setUsername(String username) {
         this.username = username;
     }
+
     public ClientHandler(Server server, Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
@@ -67,16 +68,23 @@ public class ClientHandler {
                             sendMessage("/exitok");
                             break;
                         }
-                        else if (message.startsWith("/w")) {
-
+                        if (message.startsWith("/w")) {
                             String[] words = message.split(" ");
+                            if (words.length < 3) {
+                                sendMessage("Неверный формат команды /w");
+                                continue;
+                            }
                             String userToSend = words[1];
+                            if (!(server.isUsernameBusy(userToSend))) {
+                                sendMessage("Вы хотите отправить сообщение несуществующему пользователю");
+                                continue;
+                            }
                             String messageToSend = "";
                             for (int i = 2; i < words.length; i++) {
                                 messageToSend = messageToSend.concat(words[i] + " ");
                             }
                             server.whisperMessage(username + ": " + messageToSend, userToSend);
-
+                            continue;
                         }
                         continue;
                     }
