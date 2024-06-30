@@ -49,5 +49,13 @@ public class Server {
             }
         }
     }
+    public boolean isUsernameBusy(String username) {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 

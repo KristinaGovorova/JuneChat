@@ -35,15 +35,25 @@ public class ClientHandler {
                         if (message.equals("/exit")) {
                             sendMessage("/exitok");
                             break;
-                        } else if (message.startsWith("/w")) {
-
-                            String[] words = message.split(" ");
+                        }
+                        if (message.startsWith("/w")) {
+                            String[] words = message.split(" ", 3);
+                            if (words.length < 3) {
+                                sendMessage("Неверный формат команды /w");
+                                continue;
+                            }
                             String userToSend = words[1];
+                            if (!(server.isUsernameBusy(userToSend))) {
+                                sendMessage("Вы хотите отправить сообщение несуществующему пользователю");
+                                continue;
+                            }
                             String messageToSend = "";
                             for (int i = 2; i < words.length; i++) {
-                                messageToSend = messageToSend.concat(words[i] + " ");
+                                messageToSend = words[2];
                             }
                             server.whisperMessage(username + ": " + messageToSend, userToSend);
+                            sendMessage(getUsername() +": " + messageToSend);
+                            continue;
 
                         }
                         continue;
