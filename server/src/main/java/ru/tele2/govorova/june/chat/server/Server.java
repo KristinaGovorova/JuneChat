@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
 public class Server {
     private int port;
     private List<ClientHandler> clients;
@@ -50,6 +49,7 @@ public class Server {
             c.sendMessage(message);
         }
     }
+
     public synchronized void whisperMessage(String message, String username) {
         for (ClientHandler c : clients) {
             if (c.getUsername().equals(username)) {
@@ -57,6 +57,7 @@ public class Server {
             }
         }
     }
+
     public boolean isUsernameBusy(String username) {
         for (ClientHandler c : clients) {
             if (c.getUsername().equals(username)) {
@@ -65,4 +66,23 @@ public class Server {
         }
         return false;
     }
+
+    public boolean isUsernameAdmin(String role) {
+        {
+            if (role.equals("ADMIN")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized void disconnectUser(String userName) {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(userName)) {
+                c.sendMessage("/exit");
+                return;
+            }
+        }
+    }
+
 }
