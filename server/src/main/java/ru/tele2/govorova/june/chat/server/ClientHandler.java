@@ -48,11 +48,9 @@ public class ClientHandler {
                                 continue;
                             }
                             String messageToSend = "";
-                            for (int i = 2; i < words.length; i++) {
-                                messageToSend = words[2];
-                            }
-                            server.whisperMessage(username + ": " + messageToSend, userToSend);
-                            sendMessage(getUsername() +": " + messageToSend);
+                            messageToSend = words[2];
+
+                            server.whisperMessage(this, username + ": " + messageToSend, userToSend);
                             continue;
 
                         }
