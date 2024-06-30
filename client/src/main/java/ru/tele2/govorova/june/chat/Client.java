@@ -34,8 +34,9 @@ public class Client {
                     }
                     if (message.equals("/exit")) {
                         System.out.println("Администратор удалил вас из чата");
+                        out.writeUTF("/exit");
                         break;
-                    }å
+                    }
                     System.out.println(message);
                 }
             } catch (IOException e) {

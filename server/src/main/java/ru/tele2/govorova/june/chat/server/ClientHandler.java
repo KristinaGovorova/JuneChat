@@ -1,9 +1,11 @@
 package ru.tele2.govorova.june.chat.server;
 
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+
 
 public class ClientHandler {
     private Server server;
@@ -12,14 +14,23 @@ public class ClientHandler {
     private DataOutputStream out;
 
     private String username;
+    private String role;
 
 
     public String getUsername() {
         return username;
     }
 
+    public String getRole() {
+        return role;
+    }
+
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public ClientHandler(Server server, Socket socket) throws IOException {
@@ -37,6 +48,7 @@ public class ClientHandler {
                         sendMessage("/exitok");
                         return;
                     }
+
                     if (message.startsWith("/auth ")) {
                         String[] elements = message.split(" ");
                         if (elements.length != 3) {
@@ -60,7 +72,10 @@ public class ClientHandler {
                         continue;
                     }
                     sendMessage("Перед работой с чатом необходимо выполнить аутентификацию '/auth login password' или регистрацию '/register login password username'");
+
+
                 }
+
                 while (true) {
                     String message = in.readUTF();
                     if (message.startsWith("/")) {
@@ -85,6 +100,23 @@ public class ClientHandler {
                             }
                             server.whisperMessage(username + ": " + messageToSend, userToSend);
                             continue;
+                        }
+                        if (message.startsWith("/kick")) {
+                             if (!(getRole().equals("ADMIN"))){
+                                 sendMessage("Данное действие недоступно. Вы не администратор");
+                                 continue;
+                            }
+                                String[] elements = message.split(" ");
+                                if (elements.length != 2) {
+                                    sendMessage("Неверный формат команды /kick");
+                                    continue;
+                                }
+                                if (!(server.isUsernameBusy(elements[1]))) {
+                                    sendMessage("Вы хотите выгнать несуществующего пользователя");
+                                    continue;
+                                }
+                                server.disconnectUser(elements[1]);
+                                continue;
                         }
                         continue;
                     }
@@ -130,5 +162,7 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
+
 }
+
 

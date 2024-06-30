@@ -4,27 +4,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InMemoryAuthenticationProvider implements AuthenticationProvider {
+
     private class User {
         private String login;
         private String password;
         private String username;
+        private String role;
 
-        public User(String login, String password, String username) {
+        public User(String login, String password, String username, String role) {
             this.login = login;
             this.password = password;
             this.username = username;
+            this.role = role;
+
         }
     }
 
-    private Server server;
-    private List<User> users;
+    private static Server server;
+    private static List<User> users;
 
     public InMemoryAuthenticationProvider(Server server) {
         this.server = server;
         this.users = new ArrayList<>();
-        this.users.add(new User("login1", "pass1", "bob"));
-        this.users.add(new User("login2", "pass2", "user2"));
-        this.users.add(new User("login3", "pass3", "user3"));
+        this.users.add(new User("login1", "pass1", "bob", "ADMIN"));
+        this.users.add(new User("login2", "pass2", "user2", "USER"));
+        this.users.add(new User("login3", "pass3", "user3", "USER"));
     }
 
     @Override
@@ -36,6 +40,15 @@ public class InMemoryAuthenticationProvider implements AuthenticationProvider {
         for (User u : users) {
             if (u.login.equals(login) && u.password.equals(password)) {
                 return u.username;
+            }
+        }
+        return null;
+    }
+
+    public static String getRole(String username) {
+        for (User u : users) {
+            if (u.username.equals(username)) {
+                return u.role;
             }
         }
         return null;
@@ -71,6 +84,7 @@ public class InMemoryAuthenticationProvider implements AuthenticationProvider {
             return false;
         }
         clientHandler.setUsername(authUsername);
+        clientHandler.setRole(getRole(authUsername));
         server.subscribe(clientHandler);
         clientHandler.sendMessage("/authok " + authUsername);
         return true;
@@ -90,10 +104,13 @@ public class InMemoryAuthenticationProvider implements AuthenticationProvider {
             clientHandler.sendMessage("Указанное имя пользователя уже занято");
             return false;
         }
-        users.add(new User(login, password, username));
+
+        users.add(new User(login, password, username, "USER"));
         clientHandler.setUsername(username);
         server.subscribe(clientHandler);
         clientHandler.sendMessage("/regok " + username);
         return true;
     }
+
+
 }
