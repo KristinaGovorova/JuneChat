@@ -36,6 +36,24 @@ public class ClientHandler {
                             sendMessage("/exitok");
                             break;
                         }
+                        if (message.startsWith("/w")) {
+                            String[] words = message.split(" ", 3);
+                            if (words.length < 3) {
+                                sendMessage("Неверный формат команды /w");
+                                continue;
+                            }
+                            String userToSend = words[1];
+                            if (!(server.isUsernameBusy(userToSend))) {
+                                sendMessage("Вы хотите отправить сообщение несуществующему пользователю");
+                                continue;
+                            }
+                            String messageToSend = "";
+                            messageToSend = words[2];
+
+                            server.whisperMessage(this, username + ": " + messageToSend, userToSend);
+                            continue;
+
+                        }
                         continue;
                     }
                     server.broadcastMessage(username + ": " + message);
@@ -81,3 +99,4 @@ public class ClientHandler {
         }
     }
 }
+

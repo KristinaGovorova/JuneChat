@@ -41,4 +41,27 @@ public class Server {
             c.sendMessage(message);
         }
     }
+
+    public synchronized void whisperMessage(ClientHandler sourceClient, String message, String username) {
+        if (isUsernameBusy(username)) {
+            for (ClientHandler c : clients) {
+                if (c.getUsername().equals(username)) {
+                    c.sendMessage(message);
+                    sourceClient.sendMessage(message);
+                }
+            }
+        }
+        else {
+            System.out.println("Указанный пользователь не онлайн");
+        }
+    }
+    public boolean isUsernameBusy(String username) {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
+
