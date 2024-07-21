@@ -111,6 +111,4 @@ public class InMemoryAuthenticationProvider implements AuthenticationProvider {
         clientHandler.sendMessage("/regok " + username);
         return true;
     }
-
-
 }

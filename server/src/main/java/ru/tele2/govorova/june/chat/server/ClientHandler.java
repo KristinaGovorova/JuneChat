@@ -72,8 +72,6 @@ public class ClientHandler {
                         continue;
                     }
                     sendMessage("Перед работой с чатом необходимо выполнить аутентификацию '/auth login password' или регистрацию '/register login password username'");
-
-
                 }
 
                 while (true) {
@@ -161,7 +159,4 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
-
 }
-
-
