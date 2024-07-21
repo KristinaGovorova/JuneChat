@@ -5,21 +5,29 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Server {
     private int port;
     private List<ClientHandler> clients;
+    private AuthenticationProvider authenticationProvider;
+
+    public AuthenticationProvider getAuthenticationProvider() {
+        return authenticationProvider;
+    }
 
     public Server(int port) {
         this.port = port;
         this.clients = new ArrayList<>();
+        this.authenticationProvider = new InMemoryAuthenticationProvider(this);
     }
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Сервер запущен на порту: " + port);
+            authenticationProvider.initialize();
             while (true) {
                 Socket socket = serverSocket.accept();
-                subscribe(new ClientHandler(this, socket));
+                new ClientHandler(this, socket);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -39,6 +47,35 @@ public class Server {
     public synchronized void broadcastMessage(String message) {
         for (ClientHandler c : clients) {
             c.sendMessage(message);
+        }
+    }
+
+    public synchronized void whisperMessage(ClientHandler sourceClient, String message, String username) {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(username)) {
+                c.sendMessage(message);
+                sourceClient.sendMessage(message);
+                return;
+            }
+        }
+        sourceClient.sendMessage("Указанный пользователь не онлайн");
+    }
+
+    public boolean isUsernameBusy(String username) {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized void disconnectUser(String userName) {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(userName)) {
+                c.sendMessage("/exit");
+                return;
+            }
         }
     }
 }
