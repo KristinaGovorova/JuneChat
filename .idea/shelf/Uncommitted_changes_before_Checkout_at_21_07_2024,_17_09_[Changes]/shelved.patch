@@ -1,0 +1,36 @@
+Index: server/src/main/java/ru/tele2/govorova/june/chat/server/Server.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package ru.tele2.govorova.june.chat.server;\r\n\r\nimport java.net.ServerSocket;\r\nimport java.net.Socket;\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\n\r\npublic class Server {\r\n    private int port;\r\n    private List<ClientHandler> clients;\r\n\r\n    public Server(int port) {\r\n        this.port = port;\r\n        this.clients = new ArrayList<>();\r\n    }\r\n\r\n    public void start() {\r\n        try (ServerSocket serverSocket = new ServerSocket(port)) {\r\n            System.out.println(\"Сервер запущен на порту: \" + port);\r\n            while (true) {\r\n                Socket socket = serverSocket.accept();\r\n                subscribe(new ClientHandler(this, socket));\r\n            }\r\n        } catch (Exception e) {\r\n            e.printStackTrace();\r\n        }\r\n    }\r\n\r\n    public synchronized void subscribe(ClientHandler clientHandler) {\r\n        broadcastMessage(\"В чат зашел: \" + clientHandler.getUsername());\r\n        clients.add(clientHandler);\r\n    }\r\n\r\n    public synchronized void unsubscribe(ClientHandler clientHandler) {\r\n        clients.remove(clientHandler);\r\n        broadcastMessage(\"Из чата вышел: \" + clientHandler.getUsername());\r\n    }\r\n\r\n    public synchronized void broadcastMessage(String message) {\r\n        for (ClientHandler c : clients) {\r\n            c.sendMessage(message);\r\n        }\r\n    }\r\n\r\n    public synchronized void whisperMessage(ClientHandler sourceClient, String message, String username) {\r\n        if (isUsernameBusy(username)) {\r\n            for (ClientHandler c : clients) {\r\n                if (c.getUsername().equals(username)) {\r\n                    c.sendMessage(message);\r\n                    sourceClient.sendMessage(message);\r\n                }\r\n            }\r\n        }\r\n        else {\r\n            System.out.println(\"Указанный пользователь не онлайн\");\r\n        }\r\n    }\r\n    public boolean isUsernameBusy(String username) {\r\n        for (ClientHandler c : clients) {\r\n            if (c.getUsername().equals(username)) {\r\n                return true;\r\n            }\r\n        }\r\n        return false;\r\n    }\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/server/src/main/java/ru/tele2/govorova/june/chat/server/Server.java b/server/src/main/java/ru/tele2/govorova/june/chat/server/Server.java
+--- a/server/src/main/java/ru/tele2/govorova/june/chat/server/Server.java	(revision 7c05617a7d6d519474fa1f05f8700c2d5fdad9ef)
++++ b/server/src/main/java/ru/tele2/govorova/june/chat/server/Server.java	(date 1721570824720)
+@@ -43,18 +43,16 @@
+     }
+ 
+     public synchronized void whisperMessage(ClientHandler sourceClient, String message, String username) {
+-        if (isUsernameBusy(username)) {
+-            for (ClientHandler c : clients) {
+-                if (c.getUsername().equals(username)) {
+-                    c.sendMessage(message);
+-                    sourceClient.sendMessage(message);
+-                }
++        for (ClientHandler c : clients) {
++            if (c.getUsername().equals(username)) {
++                c.sendMessage(message);
++                sourceClient.sendMessage(message);
++                return;
+             }
+         }
+-        else {
+-            System.out.println("Указанный пользователь не онлайн");
+-        }
++        sourceClient.sendMessage("Указанный пользователь не онлайн");
+     }
++
+     public boolean isUsernameBusy(String username) {
+         for (ClientHandler c : clients) {
+             if (c.getUsername().equals(username)) {
