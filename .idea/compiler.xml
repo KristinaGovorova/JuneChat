@@ -10,9 +10,5 @@
         <module name="client" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="db" target="11" />
-      <module name="dv" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>
