@@ -21,12 +21,3 @@
 	constraint role_fk foreign key (role_id) references roles(id),
 	primary key (user_id, role_id)
 	);
-
-	insert into users (login,"password",user_name)
-	values ('admin','admin','admin'),('user','user','user');
-
-	insert into roles ("name",description)
-	values ('admin','Администратор'),('user','Пользователь');
-
-	insert into users_to_roles (user_id, role_id)
-	values (1,1),(1,2),(2,2);
