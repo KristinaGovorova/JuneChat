@@ -36,7 +36,8 @@ build/
 
 ### Mac OS ###
 .DS_Store
-/.idea/
-/server/target/
 
 
+.idea/
+*.iml
+target/
