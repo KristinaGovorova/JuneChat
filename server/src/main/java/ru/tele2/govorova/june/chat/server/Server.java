@@ -1,24 +1,43 @@
 package ru.tele2.govorova.june.chat.server;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
+import ru.tele2.govorova.june.chat.server.DatabaseAuthenticationProvider;
 
 
 public class Server {
     private int port;
     private List<ClientHandler> clients;
     private AuthenticationProvider authenticationProvider;
+    private Properties properties;
+    private static final String CONFIG_PATH = "config.properties";
 
     public AuthenticationProvider getAuthenticationProvider() {
         return authenticationProvider;
     }
 
-    public Server(int port) {
+    public Server(int port) throws SQLException, IOException {
         this.port = port;
         this.clients = new ArrayList<>();
-        this.authenticationProvider = new InMemoryAuthenticationProvider(this);
+        getProperties();
+        this.authenticationProvider = new DatabaseAuthenticationProvider(this,
+                properties.getProperty("database_url"),
+                properties.getProperty("database_login"),
+                properties.getProperty("database_password"));
+    }
+
+    private void getProperties() throws IOException {
+        properties = new Properties();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream stream = loader.getResourceAsStream(CONFIG_PATH);
+        properties.load(stream);
     }
 
     public void start() {
