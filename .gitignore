@@ -41,3 +41,7 @@ build/
 .idea/
 *.iml
 target/
+.gitignore
+.idea/misc.xml
+.idea/.gitignore
+.idea/workspace.xml
