@@ -2,11 +2,14 @@ package ru.tele2.govorova.june.chat.server;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.tele2.govorova.june.chat.server.db.Queries;
+import ru.tele2.govorova.june.chat.server.schedulers.UnbanScheduler;
 
 public class DatabaseAuthenticationProvider implements AuthenticationProvider {
     private static final Logger logger = LogManager.getLogger(DatabaseAuthenticationProvider.class.getName());
@@ -24,6 +27,9 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
     @Override
     public void initialize() {
         logger.info("Сервис аутентификации запущен: Database режим");
+        UnbanScheduler unbanScheduler = new UnbanScheduler(server);
+        server.getConnectionsPool().execute(unbanScheduler::run);
+        logger.info("UnbanScheduler запущен");
     }
 
     private String getUsernameByLoginAndPassword(String login, String password) {
@@ -172,5 +178,19 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         } catch (SQLException se) {
             logger.error("Ошибка при выполнении SQL запроса", se);
         }
+    }
+
+    @Override
+    public Set<String> getUsersToUnban() {
+        Set<String> bannedUsers = new HashSet<>();
+        try (PreparedStatement ps = connection.prepareStatement(Queries.GET_USERS_TO_UNBAN)) {
+            ResultSet result = ps.executeQuery();
+            while (result.next()) {
+                bannedUsers.add(result.getString("user_name"));
+            }
+        } catch (SQLException se) {
+            logger.error("Ошибка при выполнении SQL запроса", se);
+        }
+        return bannedUsers;
     }
 }

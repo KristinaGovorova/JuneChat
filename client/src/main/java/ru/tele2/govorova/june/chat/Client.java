@@ -36,6 +36,11 @@ public class Client {
                         out.writeUTF("/exit");
                         break;
                     }
+                    if (message.equals("/afk")) {
+                        System.out.println("Вы были удалены за неактивность");
+                        out.writeUTF("/afk");
+                        break;
+                    }
                     System.out.println(message);
                 }
             } catch (IOException e) {

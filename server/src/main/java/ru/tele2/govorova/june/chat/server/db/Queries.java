@@ -35,10 +35,15 @@ public class Queries {
             """;
 
     public final static String BAN_OR_UNBAN_USER = """
-            UPDATE users SET ban_flag = ?, unban_date = ? WHERE user_name = ?
+            update users SET ban_flag = ?, unban_date = ? WHERE user_name = ?
             """;
 
     public final static String GET_USER_BLOCK_STATUS = """
-            SELECT ban_flag from users WHERE user_name = ?
+            select ban_flag from users WHERE user_name = ?
+            """;
+
+    public final static String GET_USERS_TO_UNBAN = """
+            select user_name from users where ban_flag = 'Y' and
+            CURRENT_TIMESTAMP > unban_date ;
             """;
 }

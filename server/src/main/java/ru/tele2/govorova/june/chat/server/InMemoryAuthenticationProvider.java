@@ -2,6 +2,7 @@ package ru.tele2.govorova.june.chat.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class InMemoryAuthenticationProvider implements AuthenticationProvider {
 
@@ -120,5 +121,10 @@ public class InMemoryAuthenticationProvider implements AuthenticationProvider {
     @Override
     public void setUserName(String currentUserName, String newUserName) {
 
+    }
+
+    @Override
+    public Set<String> getUsersToUnban() {
+        return Set.of();
     }
 }

@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class Server {
@@ -22,6 +24,7 @@ public class Server {
     private AuthenticationProvider authenticationProvider;
     private Properties properties;
     private static final String CONFIG_PATH = "config.properties";
+    private final ExecutorService connectionsPool = Executors.newCachedThreadPool();
 
     public AuthenticationProvider getAuthenticationProvider() {
         return authenticationProvider;
@@ -55,6 +58,7 @@ public class Server {
         } catch (Exception e) {
             logger.error("Ошибка при запуске сервера", e);
         }
+        connectionsPool.shutdown();
     }
 
     public synchronized void subscribe(ClientHandler clientHandler) {
@@ -119,6 +123,10 @@ public class Server {
                 client.sendMessage(message);
             }
         }
+    }
+
+    public ExecutorService getConnectionsPool() {
+        return connectionsPool;
     }
 
     public void shutdown() {
