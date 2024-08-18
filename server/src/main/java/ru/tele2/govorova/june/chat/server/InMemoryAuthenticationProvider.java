@@ -111,4 +111,14 @@ public class InMemoryAuthenticationProvider implements AuthenticationProvider {
         clientHandler.sendMessage("/regok " + username);
         return true;
     }
+
+    @Override
+    public void banOrUnbanUser(String blockStatus, int days, String userName) {
+
+    }
+
+    @Override
+    public void setUserName(String currentUserName, String newUserName) {
+
+    }
 }
