@@ -113,7 +113,7 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public boolean registration(ClientHandler clientHandler, String login, String password, String username) {
-        if (login.trim().length() < 3 || password.trim().length() < 3 || username.trim().length() < 3) {
+        if (login.trim().length() < 3 || password.trim().length() < 6 || username.trim().length() < 3) {
             clientHandler.sendMessage("Неверный формат команды.Логин 3+ символа, Пароль 6+ символов, Имя пользователя 3+ символа.");
             return false;
         }
