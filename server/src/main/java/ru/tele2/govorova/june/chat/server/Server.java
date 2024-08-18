@@ -1,23 +1,30 @@
 package ru.tele2.govorova.june.chat.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-
-import ru.tele2.govorova.june.chat.server.DatabaseAuthenticationProvider;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class Server {
+    private static final Logger logger = LogManager.getLogger(Server.class.getName());
     private int port;
     private List<ClientHandler> clients;
     private AuthenticationProvider authenticationProvider;
     private Properties properties;
     private static final String CONFIG_PATH = "config.properties";
+    private final ExecutorService connectionsPool = Executors.newCachedThreadPool();
 
     public AuthenticationProvider getAuthenticationProvider() {
         return authenticationProvider;
@@ -42,15 +49,16 @@ public class Server {
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Сервер запущен на порту: " + port);
+            logger.info("Сервер запущен на порту: {}", port);
             authenticationProvider.initialize();
             while (true) {
                 Socket socket = serverSocket.accept();
                 new ClientHandler(this, socket);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Ошибка при запуске сервера", e);
         }
+        connectionsPool.shutdown();
     }
 
     public synchronized void subscribe(ClientHandler clientHandler) {
@@ -96,5 +104,32 @@ public class Server {
                 return;
             }
         }
+    }
+
+    public synchronized void sendActiveUsers(ClientHandler sourceClient) {
+        StringBuilder clientList = new StringBuilder();
+        for (ClientHandler client : clients) {
+            clientList.append(client.getUsername()).append("\r\n");
+        }
+        sourceClient.sendMessage(clientList.toString());
+    }
+
+    public synchronized void sendUserNameChangedMessage(String oldUserName, String newUserName) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("[hh24:mm:ss]");
+        String messageTime = simpleDateFormat.format(new Date());
+        String message = messageTime + " UserName " + oldUserName + " is changed to " + newUserName;
+        for (ClientHandler client : clients) {
+            if (!client.getUsername().equals(newUserName)) {
+                client.sendMessage(message);
+            }
+        }
+    }
+
+    public ExecutorService getConnectionsPool() {
+        return connectionsPool;
+    }
+
+    public void shutdown() {
+        System.exit(0);
     }
 }

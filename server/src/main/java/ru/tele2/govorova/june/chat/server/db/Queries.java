@@ -29,4 +29,21 @@ public class Queries {
             u.id = ur.user_id and 
             u.user_name = ?
             """;
+
+    public final static String SET_USER_NAME = """
+            update users set user_name = ? where user_name = ?
+            """;
+
+    public final static String BAN_OR_UNBAN_USER = """
+            update users SET ban_flag = ?, unban_date = ? WHERE user_name = ?
+            """;
+
+    public final static String GET_USER_BLOCK_STATUS = """
+            select ban_flag from users WHERE user_name = ?
+            """;
+
+    public final static String GET_USERS_TO_UNBAN = """
+            select user_name from users where ban_flag = 'Y' and
+            CURRENT_TIMESTAMP > unban_date ;
+            """;
 }

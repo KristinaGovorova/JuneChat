@@ -22,7 +22,6 @@ public class Client {
                     String message = in.readUTF();
                     if (message.equals("/exitok")) {
                         break;
-
                     }
                     if (message.startsWith("/authok ")) {
                         System.out.println("Удалось успешно войти в чат под именем пользователя: " + message.split(" ")[1]);
@@ -35,6 +34,11 @@ public class Client {
                     if (message.equals("/exit")) {
                         System.out.println("Администратор удалил вас из чата");
                         out.writeUTF("/exit");
+                        break;
+                    }
+                    if (message.equals("/afk")) {
+                        System.out.println("Вы были удалены за неактивность");
+                        out.writeUTF("/afk");
                         break;
                     }
                     System.out.println(message);
