@@ -2,6 +2,7 @@ package ru.tele2.govorova.june.chat.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.tele2.govorova.june.chat.server.schedulers.AfkScheduler;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,6 +14,7 @@ import java.util.Date;
 
 public class ClientHandler {
     private static final Logger logger = LogManager.getLogger(ClientHandler.class.getName());
+    private final AfkScheduler afkScheduler;
 
     private Server server;
     private Socket socket;
@@ -54,17 +56,22 @@ public class ClientHandler {
         this.in = new DataInputStream(socket.getInputStream());
         this.out = new DataOutputStream(socket.getOutputStream());
 
+        afkScheduler = new AfkScheduler(this, 1200);
+
+        server.getConnectionsPool().execute(afkScheduler::run);
+        logger.info("AfkScheduler запущен");
+
         new Thread(() -> {
             try {
                 sendMessage("Перед работой с чатом необходимо выполнить аутентификацию '/auth login password' или регистрацию '/register login password username'");
                 logger.info("Подключился новый клиент");
                 while (true) {
                     String message = in.readUTF();
+                    afkScheduler.setLastActive();
                     if (message.equals("/exit")) {
                         sendMessage("/exitok");
                         return;
                     }
-
                     if (message.startsWith("/auth ")) {
                         String[] elements = message.split(" ");
                         if (elements.length != 3) {
@@ -90,9 +97,10 @@ public class ClientHandler {
                 }
 
                 while (true) {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("[hh24:mm:ss]");
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("[HH:mm:ss]");
                     String messageTime = simpleDateFormat.format(new Date());
                     String message = in.readUTF();
+                    afkScheduler.setLastActive();
                     if (message.startsWith("/")) {
                         if (message.equals("/exit")) {
                             sendMessage("/exitok");
@@ -115,7 +123,6 @@ public class ClientHandler {
                             server.whisperMessage(this, messageTime + username + ": " + messageToSend, userToSend);
                             continue;
                         }
-
                         if (message.startsWith("/activelist")) {
                             String[] elements = message.split(" ");
                             if (elements.length > 1) {
@@ -138,7 +145,6 @@ public class ClientHandler {
                             this.sendMessage("Your userName is changed to \"" + newUserName + "\"");
                             continue;
                         }
-
                         if (message.startsWith("/kick")) {
                             if (!(getRole().equals("admin"))) {
                                 sendMessage("Данное действие недоступно. Вы не администратор");
@@ -164,7 +170,7 @@ public class ClientHandler {
                             String[] elements = message.split(" ");
                             if (elements.length == 2) {
                                 String userToBan = elements[1];
-                                server.getAuthenticationProvider().banOrUnbanUser("Y", -1, userToBan);
+                                server.getAuthenticationProvider().banOrUnbanUser("Y", 0, userToBan);
                                 server.disconnectUser(userToBan);
                                 sendMessage("Пользователь " + userToBan + " заблокирован");
                                 continue;
@@ -198,6 +204,9 @@ public class ClientHandler {
                             }
                             sendMessage("/shutdown_ok");
                             server.shutdown();
+                            break;
+                        }
+                        if (message.startsWith("/afk")) {
                             break;
                         }
                         continue;
